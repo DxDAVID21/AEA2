@@ -1,0 +1,101 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Budget {
+  id        Int       @id @default(autoincrement())
+  month     Int
+  year      Int
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  categories Category[]
+
+  @@unique([month, year])
+  @@index([year, month])
+}
+
+model Category {
+  id        Int      @id @default(autoincrement())
+  budgetId  Int
+  name      String
+  limit     Float
+  color     String   @default("#3B82F6")
+  icon      String   @default("📁")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  budget    Budget    @relation(fields: [budgetId], references: [id], onDelete: Cascade)
+  expenses  Expense[]
+
+  @@index([budgetId])
+}
+
+model Expense {
+  id          Int      @id @default(autoincrement())
+  categoryId  Int
+  amount      Float
+  description String   @default("")
+  date        DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  category    Category @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  @@index([categoryId])
+  @@index([date])
+}
+
+model Goal {
+  id            Int       @id @default(autoincrement())
+  name          String
+  targetAmount  Float
+  currentAmount Float     @default(0)
+  targetDate    DateTime?
+  icon          String    @default("🎯")
+  color         String    @default("#10B981")
+  isCompleted   Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  milestones    Milestone[]
+
+  @@index([isCompleted])
+}
+
+model Milestone {
+  id          Int       @id @default(autoincrement())
+  goalId      Int
+  percentage  Int
+  amount      Float
+  note        String?
+  achievedAt  DateTime  @default(now())
+
+  goal        Goal      @relation(fields: [goalId], references: [id], onDelete: Cascade)
+
+  @@index([goalId])
+}
+
+model Insight {
+  id          Int       @id @default(autoincrement())
+  type        String    @default("general")
+  content     String
+  generatedAt DateTime  @default(now())
+  isRead      Boolean   @default(false)
+
+  @@index([generatedAt])
+}
+
+model ChatMessage {
+  id        Int       @id @default(autoincrement())
+  role      String
+  content   String
+  createdAt DateTime  @default(now())
+
+  @@index([createdAt])
+}

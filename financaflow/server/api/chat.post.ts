@@ -22,7 +22,7 @@ ${context ? `\n\nContext financer actual:\n${context}` : ''}`
     const response = await $fetch<{ message: { content: string } }>(`${config.public.ollamaUrl}/api/chat`, {
       method: 'POST',
       body: {
-        model: 'llama3.1',
+        model: 'llama3.1:8b',
         messages: [
           { role: 'system', content: systemPrompt },
           ...messages

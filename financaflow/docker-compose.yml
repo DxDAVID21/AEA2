@@ -1,8 +1,7 @@
-version: '3.8'
-
 services:
   app:
     build: .
+    restart: always
     ports:
       - "3000:3000"
     depends_on:
@@ -22,10 +21,13 @@ services:
 
   db:
     image: postgres:16-alpine
+    restart: always
     environment:
       POSTGRES_DB: financaflow
       POSTGRES_USER: financaflow
       POSTGRES_PASSWORD: financaflow
+    ports:
+      - "5432:5432" 
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -40,13 +42,15 @@ services:
       - "11434:11434"
     volumes:
       - ollamadata:/root/.ollama
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia.com/gpu
-              count: 1
-              capabilities: [gpu]
+    entrypoint: /bin/sh
+    command: -c "ollama pull llama3.2:1b || true && ollama serve"
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia.com/gpu
+    #           count: 1
+    #           capabilities: [gpu]
 
 volumes:
   pgdata:

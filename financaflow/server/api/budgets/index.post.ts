@@ -8,23 +8,44 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, message: 'Month and year are required' })
   }
 
-  const budget = await prisma.budget.create({
-    data: {
-      month,
-      year,
-      categories: {
-        create: categories?.map((cat: { name: string; limit: number; color?: string; icon?: string }) => ({
-          name: cat.name,
-          limit: cat.limit,
-          color: cat.color || '#3B82F6',
-          icon: cat.icon || '📁'
-        })) || []
+  try {
+    const budget = await prisma.budget.upsert({
+      where: { month_year: { month, year } },
+      update: {
+        categories: {
+          create: categories?.map((cat: { name: string; limit: number; color?: string; icon?: string }) => ({
+            name: cat.name,
+            limit: cat.limit,
+            color: cat.color || '#3B82F6',
+            icon: cat.icon || '📁'
+          })) || []
+        }
+      },
+      create: {
+        month,
+        year,
+        categories: {
+          create: categories?.map((cat: { name: string; limit: number; color?: string; icon?: string }) => ({
+            name: cat.name,
+            limit: cat.limit,
+            color: cat.color || '#3B82F6',
+            icon: cat.icon || '📁'
+          })) || []
+        }
+      },
+      include: {
+        categories: true
       }
-    },
-    include: {
-      categories: true
-    }
-  })
+    })
 
-  return budget
+    return budget
+  } catch (error: any) {
+    if (error.code === 'P2002') {
+      throw createError({ 
+        statusCode: 409, 
+        message: 'Ja existeix un pressupost per a aquest mes i any' 
+      })
+    }
+    throw error
+  }
 })

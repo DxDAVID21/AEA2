@@ -27,7 +27,7 @@ services:
       POSTGRES_USER: financaflow
       POSTGRES_PASSWORD: financaflow
     ports:
-      - "5432:5432" 
+      - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -44,14 +44,6 @@ services:
       - ollamadata:/root/.ollama
     entrypoint: /bin/sh
     command: -c "ollama pull llama3.2:1b || true && ollama serve"
-    # deploy:
-    #   resources:
-    #     reservations:
-    #       devices:
-    #         - driver: nvidia.com/gpu
-    #           count: 1
-    #           capabilities: [gpu]
-
 volumes:
   pgdata:
   ollamadata:
